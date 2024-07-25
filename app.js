@@ -1,8 +1,24 @@
+
 // Grupo #11
 // Madelyn Zambrano
 //Michelle Salazar
 //Juan Mendoza
 //Hector Fernandez
+
+
+// Grupo #10
+// Melanie Anchundia 
+// Cristina Cedeño
+// Daivelyn Pincay 
+// Karen Holguin
+
+// Grupo #7
+// Nombre de integrantes:
+// George Joseph Paredes Carrillo 
+// Jhon Luis Pilco Quiroz
+// Jandry Jahir Cedeño Mero
+// Justin Enrique Morales Bravo
+
 
 const express = require("express");
 const app = express();
