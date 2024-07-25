@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:4.4
+    container_name: mongodb-examen
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  app:
+    build: .
+    container_name: node-app-examen
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017/mydatabase
+    working_dir: /app
+    volumes:
+      - ./public:/app/public   # Monta la carpeta 'public' dentro del contenedor en '/app/public'
+
+volumes:
+  mongo-data:
+

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Management</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-100">
+    <div class="container mx-auto p-8">
+      <h1 class="text-3xl font-bold mb-6 text-center">Project Management</h1>
+
+      <h2 class="text-2xl font-bold mb-4">Add Project</h2>
+      <form id="projectForm" class="mb-6">
+        <input
+          type="text"
+          id="projectNameInput"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          placeholder="Project Name"
+        />
+        <input
+          type="text"
+          id="projectDescriptionInput"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mt-2"
+          placeholder="Project Description"
+        />
+        <button
+          type="submit"
+          class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Add Project
+        </button>
+      </form>
+
+      <h2 class="text-2xl font-bold mb-4">Add Task</h2>
+      <form id="taskForm" class="mb-6">
+        <input
+          type="text"
+          id="taskProjectIdInput"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          placeholder="Project ID"
+          readonly
+        />
+        <input
+          type="text"
+          id="taskTitleInput"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mt-2"
+          placeholder="Task Title"
+        />
+        <input
+          type="text"
+          id="taskDescriptionInput"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mt-2"
+          placeholder="Task Description"
+        />
+        <input
+          type="text"
+          id="taskStatusInput"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mt-2"
+          placeholder="Task Status"
+        />
+        <button
+          type="submit"
+          class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Add Task
+        </button>
+      </form>
+
+      <h2 class="text-2xl font-bold mb-4">Projects</h2>
+      <ul id="projectList" class="list-disc pl-5 mb-8"></ul>
+
+      <h2 class="text-2xl font-bold mb-4">Tasks</h2>
+      <ul id="taskList" class="list-disc pl-5"></ul>
+    </div>
+
+    <script>
+      document
+        .getElementById("projectForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+          const nameInput = document
+            .getElementById("projectNameInput")
+            .value.trim();
+          const descriptionInput = document
+            .getElementById("projectDescriptionInput")
+            .value.trim();
+
+          if (nameInput && descriptionInput) {
+            const response = await fetch("/addProject", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                name: nameInput,
+                description: descriptionInput,
+              }),
+            });
+
+            if (response.ok) {
+              const project = await response.json();
+              const newProject = document.createElement("li");
+              newProject.textContent = `${nameInput} - ${descriptionInput}`;
+              newProject.dataset.projectId = project.insertedId; // Assuming the response returns the inserted project ID
+              newProject.addEventListener("click", () => {
+                document.getElementById("taskProjectIdInput").value =
+                  project.insertedId;
+                fetchTasks(project.insertedId);
+              });
+              document.getElementById("projectList").appendChild(newProject);
+              document.getElementById("projectNameInput").value = "";
+              document.getElementById("projectDescriptionInput").value = "";
+            } else {
+              alert("Failed to add project");
+            }
+          }
+        });
+
+      document
+        .getElementById("taskForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+          const projectIdInput = document
+            .getElementById("taskProjectIdInput")
+            .value.trim();
+          const titleInput = document
+            .getElementById("taskTitleInput")
+            .value.trim();
+          const descriptionInput = document
+            .getElementById("taskDescriptionInput")
+            .value.trim();
+          const statusInput = document
+            .getElementById("taskStatusInput")
+            .value.trim();
+
+          if (projectIdInput && titleInput && descriptionInput && statusInput) {
+            const response = await fetch("/addTask", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                projectId: projectIdInput,
+                title: titleInput,
+                description: descriptionInput,
+                status: statusInput,
+              }),
+            });
+
+            if (response.ok) {
+              const newTask = document.createElement("li");
+              newTask.textContent = `Project: ${projectIdInput} - ${titleInput} - ${descriptionInput} - Status: ${statusInput}`;
+              document.getElementById("taskList").appendChild(newTask);
+              document.getElementById("taskTitleInput").value = "";
+              document.getElementById("taskDescriptionInput").value = "";
+              document.getElementById("taskStatusInput").value = "";
+            } else {
+              alert("Failed to add task");
+            }
+          }
+        });
+
+      // Fetch and display projects
+      async function fetchProjects() {
+        const response = await fetch("/projects");
+        const projects = await response.json();
+        const projectList = document.getElementById("projectList");
+        projects.forEach((project) => {
+          const li = document.createElement("li");
+          li.textContent = `${project.name} - ${project.description}`;
+          li.dataset.projectId = project._id;
+          li.addEventListener("click", () => {
+            document.getElementById("taskProjectIdInput").value = project._id;
+            fetchTasks(project._id);
+          });
+          projectList.appendChild(li);
+        });
+      }
+
+      // Fetch and display tasks for a specific project
+      async function fetchTasks(projectId) {
+        const response = await fetch(`/tasks/${projectId}`);
+        const tasks = await response.json();
+        const taskList = document.getElementById("taskList");
+        taskList.innerHTML = ""; // Clear previous tasks
+        tasks.forEach((task) => {
+          const li = document.createElement("li");
+          li.textContent = `${task.title} - ${task.description} - Status: ${task.status}`;
+          taskList.appendChild(li);
+        });
+      }
+
+      fetchProjects();
+    </script>
+  </body>
+</html>
