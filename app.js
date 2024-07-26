@@ -19,10 +19,17 @@
 // Jandry Jahir Cedeño Mero
 // Justin Enrique Morales Bravo
 
+<<<<<<< refs/remotes/origin/Grupo8
 //Grupo #8
 //Daiton Bernardo Campuzano Espinal
 //Braulio Aldair Alava Guiña
 //José Miguel Fuentes cedeño
+=======
+//Grupo 8
+//Daiton Campuzano
+//Braulio Guiña
+//Jose Cedeño
+>>>>>>> local
 
 
 const express = require("express");
